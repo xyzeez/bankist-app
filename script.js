@@ -17,9 +17,9 @@ const account1 = {
     '2020-01-28T09:15:04.904Z',
     '2020-04-01T10:17:24.185Z',
     '2020-05-08T14:11:59.604Z',
-    '2020-05-27T17:01:17.194Z',
-    '2020-07-11T23:36:17.929Z',
-    '2020-07-12T10:51:36.790Z',
+    '2023-09-27T17:01:17.194Z',
+    '2023-09-25T23:36:17.929Z',
+    '2023-09-29T10:51:36.790Z',
   ],
   currency: 'EUR',
   locale: 'pt-PT', // de-DE
@@ -73,7 +73,25 @@ const inputLoanAmount = document.querySelector('.form__input--loan-amount');
 const inputCloseUsername = document.querySelector('.form__input--user');
 const inputClosePin = document.querySelector('.form__input--pin');
 
-// Functions .movements
+// Functions
+const formatMovementDate = date => {
+  const calcDaysPassed = (date1, date2) => {
+    return Math.round(Math.abs(date2 - date1) / (24 * 60 * 60 * 1000));
+  };
+
+  const daysPassed = calcDaysPassed(new Date(), date);
+
+  if (daysPassed === 0) return 'Today';
+  if (daysPassed === 1) return 'Yestderday';
+  if (daysPassed <= 7) return `${daysPassed} days ago`;
+  else {
+    const day = `${date.getDate()}`.padStart(2, 0);
+    const month = `${date.getMonth() + 1}`.padStart(2, 0);
+    const year = date.getFullYear();
+    return `${day}/${month}/${year}`;
+  }
+};
+
 const displayMovement = (account, sort) => {
   containerMovements.innerHTML = '';
   const movs = sort
@@ -84,9 +102,7 @@ const displayMovement = (account, sort) => {
     const type = mov > 0 ? 'deposit' : 'withdrawal';
 
     const date = new Date(account.movementsDates[i]);
-    const day = `${date.getDate()}`.padStart(2, 0);
-    const month = `${date.getMonth() + 1}`.padStart(2, 0);
-    const year = date.getFullYear();
+    const displayDate = formatMovementDate(date);
 
     const html = `
       <div class="movements__row">
@@ -94,7 +110,7 @@ const displayMovement = (account, sort) => {
       i + 1
     } ${type}</div>
           <div class="movements__date"></div>
-          <div class="movements__date">${day}/${month}/${year}</div>
+          <div class="movements__date">${displayDate}</div>
           <div class="movements__value">${mov.toFixed(2)}€</div>
       </div>
     `;
@@ -159,6 +175,7 @@ const updateUI = account => {
   calcDisplaySummary(currentAccount);
 };
 
+// Variables
 const now = new Date();
 const day = `${now.getDate()}`.padStart(2, 0);
 const month = `${now.getMonth() + 1}`.padStart(2, 0);
