@@ -73,19 +73,28 @@ const inputLoanAmount = document.querySelector('.form__input--loan-amount');
 const inputCloseUsername = document.querySelector('.form__input--user');
 const inputClosePin = document.querySelector('.form__input--pin');
 
-// Functions
-const displayMovement = (movement, sort) => {
+// Functions .movements
+const displayMovement = (account, sort) => {
   containerMovements.innerHTML = '';
-  const movs = sort ? movement.slice().sort((a, b) => a - b) : movement;
+  const movs = sort
+    ? account.movements.slice().sort((a, b) => a - b)
+    : account.movements;
 
   movs.forEach((mov, i) => {
     const type = mov > 0 ? 'deposit' : 'withdrawal';
+
+    const date = new Date(account.movementsDates[i]);
+    const day = `${date.getDate()}`.padStart(2, 0);
+    const month = `${date.getMonth() + 1}`.padStart(2, 0);
+    const year = date.getFullYear();
+
     const html = `
       <div class="movements__row">
           <div class="movements__type movements__type--${type}">${
       i + 1
     } ${type}</div>
           <div class="movements__date"></div>
+          <div class="movements__date">${day}/${month}/${year}</div>
           <div class="movements__value">${mov.toFixed(2)}€</div>
       </div>
     `;
@@ -141,7 +150,7 @@ createUserName(accounts);
 
 const updateUI = account => {
   // Display Movement
-  displayMovement(currentAccount.movements, sortStatus);
+  displayMovement(currentAccount, sortStatus);
 
   // Display balance
   displayCalcBalance(currentAccount);
@@ -149,6 +158,13 @@ const updateUI = account => {
   // Display summary
   calcDisplaySummary(currentAccount);
 };
+
+const now = new Date();
+const day = `${now.getDate()}`.padStart(2, 0);
+const month = `${now.getMonth() + 1}`.padStart(2, 0);
+const year = now.getFullYear();
+const hour = `${now.getHours()}`.padStart(2, 0);
+const minute = `${now.getMinutes()}`.padStart(2, 0);
 
 let currentAccount;
 
@@ -163,6 +179,9 @@ btnLogin.addEventListener('click', e => {
     // Display UI and message
     labelWelcome.textContent = `Welcome back, ${currentAccount.owner}`;
     containerApp.style.opacity = 1;
+
+    // Display date
+    labelDate.textContent = `${day}/${month}/${year} ${hour}:${minute}`;
 
     // Clear input fields
     inputLoginPin.value = inputLoginUsername.value = '';
@@ -187,8 +206,13 @@ btnTransfer.addEventListener('click', e => {
     currentAccount.balance > transferAmount &&
     receiverAccount !== currentAccount.username
   ) {
+    // Update sender transactions
     currentAccount.movements.push(-transferAmount);
+    currentAccount.movementsDates.push(new Date().toISOString());
+
+    // Update receiver transactions
     receiverAccount.movements.push(transferAmount);
+    receiverAccount.movementsDates.push(new Date().toISOString());
 
     updateUI(currentAccount);
 
@@ -209,6 +233,7 @@ btnLoan.addEventListener('click', e => {
   ) {
     // Add loan loanAmount
     currentAccount.movements.push(loanAmount);
+    currentAccount.movementsDates.push(new Date().toISOString());
 
     updateUI(currentAccount);
 
