@@ -74,7 +74,7 @@ const inputCloseUsername = document.querySelector('.form__input--user');
 const inputClosePin = document.querySelector('.form__input--pin');
 
 // Functions
-const formatMovementDate = date => {
+const formatMovementDate = (date, locale) => {
   const calcDaysPassed = (date1, date2) => {
     return Math.round(Math.abs(date2 - date1) / (24 * 60 * 60 * 1000));
   };
@@ -85,10 +85,7 @@ const formatMovementDate = date => {
   if (daysPassed === 1) return 'Yestderday';
   if (daysPassed <= 7) return `${daysPassed} days ago`;
   else {
-    const day = `${date.getDate()}`.padStart(2, 0);
-    const month = `${date.getMonth() + 1}`.padStart(2, 0);
-    const year = date.getFullYear();
-    return `${day}/${month}/${year}`;
+    return new Intl.DateTimeFormat(locale).format(date);
   }
 };
 
@@ -102,7 +99,7 @@ const displayMovement = (account, sort) => {
     const type = mov > 0 ? 'deposit' : 'withdrawal';
 
     const date = new Date(account.movementsDates[i]);
-    const displayDate = formatMovementDate(date);
+    const displayDate = formatMovementDate(date, account.locale);
 
     const html = `
       <div class="movements__row">
@@ -176,13 +173,6 @@ const updateUI = account => {
 };
 
 // Variables
-const now = new Date();
-const day = `${now.getDate()}`.padStart(2, 0);
-const month = `${now.getMonth() + 1}`.padStart(2, 0);
-const year = now.getFullYear();
-const hour = `${now.getHours()}`.padStart(2, 0);
-const minute = `${now.getMinutes()}`.padStart(2, 0);
-
 let currentAccount;
 
 //// Event handler
@@ -198,7 +188,21 @@ btnLogin.addEventListener('click', e => {
     containerApp.style.opacity = 1;
 
     // Display date
-    labelDate.textContent = `${day}/${month}/${year} ${hour}:${minute}`;
+    const now = new Date();
+    const locale = navigator.language;
+    const dateOptions = {
+      hour: 'numeric',
+      minute: 'numeric',
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric',
+      weekday: 'long',
+    };
+
+    labelDate.textContent = new Intl.DateTimeFormat(
+      currentAccount.locale,
+      dateOptions
+    ).format(now);
 
     // Clear input fields
     inputLoginPin.value = inputLoginUsername.value = '';
