@@ -98,7 +98,6 @@ const displayMovement = (account, sort) => {
   const movs = sort
     ? account.movements.slice().sort((a, b) => a - b)
     : account.movements;
-  // To Fix: Sort Bug
 
   movs.forEach((mov, i) => {
     const type = mov > 0 ? 'deposit' : 'withdrawal';
@@ -211,6 +210,7 @@ const startTimer = () => {
     // Check for end of timer
     if (time === 0) {
       clearInterval(timer);
+      currentAccount = null;
       labelWelcome.textContent = 'Login to get Started';
       containerApp.style.opacity = 0;
     }
@@ -365,7 +365,7 @@ let sortStatus = false;
 btnSort.addEventListener('click', e => {
   e.preventDefault();
 
-  displayMovement(currentAccount.movements, !sortStatus);
+  displayMovement(currentAccount, !sortStatus);
   sortStatus = !sortStatus;
 
   resetTimer();
