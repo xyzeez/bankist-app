@@ -98,6 +98,7 @@ const displayMovement = (account, sort) => {
   const movs = sort
     ? account.movements.slice().sort((a, b) => a - b)
     : account.movements;
+  // To Fix: Sort Bug
 
   movs.forEach((mov, i) => {
     const type = mov > 0 ? 'deposit' : 'withdrawal';
@@ -196,8 +197,44 @@ const updateUI = account => {
   calcDisplaySummary(currentAccount);
 };
 
+const startTimer = () => {
+  // Set time to 5 minutes
+  let time = 3000;
+
+  const tick = () => {
+    const min = `${Math.trunc(time / 60)}`.padStart(2, 0);
+    const sec = `${time % 60}`.padStart(2, 0);
+
+    // Display time
+    labelTimer.textContent = `${min}:${sec}`;
+
+    // Check for end of timer
+    if (time === 0) {
+      clearInterval(timer);
+      labelWelcome.textContent = 'Login to get Started';
+      containerApp.style.opacity = 0;
+    }
+
+    // Reduce timer
+    time--;
+  };
+
+  tick();
+
+  // Call Timer every sec
+  timer = setInterval(tick, 1000);
+
+  return timer;
+};
+
+const resetTimer = () => {
+  clearInterval(timer);
+  startTimer();
+};
+
 // Variables
 let currentAccount;
+let timer;
 
 //// Event handler
 // Login Event
@@ -233,6 +270,9 @@ btnLogin.addEventListener('click', e => {
     inputLoginPin.blur();
 
     updateUI(currentAccount);
+
+    if (timer) clearInterval(timer);
+    startTimer();
   }
 });
 
@@ -264,6 +304,8 @@ btnTransfer.addEventListener('click', e => {
     inputTransferTo.value = inputTransferAmount.value = '';
     inputTransferAmount.blur();
   }
+
+  resetTimer();
 });
 
 // Loan Event
@@ -276,15 +318,19 @@ btnLoan.addEventListener('click', e => {
     loanAmount > 0 &&
     currentAccount.movements.some(mov => mov > (loanAmount * 10) / 100)
   ) {
-    // Add loan loanAmount
-    currentAccount.movements.push(loanAmount);
-    currentAccount.movementsDates.push(new Date().toISOString());
+    setTimeout(() => {
+      // Add loan loanAmount
+      currentAccount.movements.push(loanAmount);
+      currentAccount.movementsDates.push(new Date().toISOString());
 
-    updateUI(currentAccount);
+      updateUI(currentAccount);
+    }, 3000);
 
     inputLoanAmount.value = '';
     inputLoanAmount.blur();
   }
+
+  resetTimer();
 });
 
 // Close Account Event
@@ -321,4 +367,6 @@ btnSort.addEventListener('click', e => {
 
   displayMovement(currentAccount.movements, !sortStatus);
   sortStatus = !sortStatus;
+
+  resetTimer();
 });
